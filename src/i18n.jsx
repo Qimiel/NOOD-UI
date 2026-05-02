@@ -44,6 +44,8 @@ export const STRINGS = {
 
   "landing.pricing.title": { fr: "Investissez dans votre avenir", en: "Invest in your future" },
   "landing.pricing.lede":  { fr: "Commencez gratuitement. Passez Pro quand vous êtes prêt.", en: "Start free. Go Pro when you're ready." },
+  "landing.pricing.teaser":     { fr: "Tarifs simples et transparents.", en: "Simple, transparent pricing." },
+  "landing.pricing.teaser.cta": { fr: "Voir les forfaits", en: "See plans" },
   "landing.tier.free":     { fr: "Découverte", en: "Free" },
   "landing.tier.free.price": { fr: "Gratuit", en: "Free" },
   "landing.tier.free.items": {
@@ -60,6 +62,68 @@ export const STRINGS = {
   "landing.tier.popular": { fr: "Plus populaire", en: "Most popular" },
   "landing.tier.cta.start": { fr: "Commencer", en: "Get started" },
   "landing.tier.cta.pro":   { fr: "Devenir Premium", en: "Go Premium" },
+
+  // Pricing page (dedicated)
+  "pricing.hero.title":   { fr: "Des forfaits clairs, sans surprise.", en: "Clear pricing, no surprises." },
+  "pricing.hero.lede":    { fr: "Choisissez ce qui vous convient. Changez ou résiliez à tout moment.", en: "Pick what fits. Change or cancel anytime." },
+  "pricing.billing.monthly": { fr: "Mensuel", en: "Monthly" },
+  "pricing.billing.annual":  { fr: "Annuel", en: "Annually" },
+  "pricing.billing.save":    { fr: "Économisez 20%", en: "Save 20%" },
+  "pricing.tier.starter":     { fr: "Découverte", en: "Starter" },
+  "pricing.tier.starter.price": { fr: "Gratuit", en: "Free" },
+  "pricing.tier.starter.lede":  { fr: "Pour tester nood sans engagement.", en: "Try nood with no commitment." },
+  "pricing.tier.starter.items": {
+    fr: ["3 analyses par mois", "Rapport vocal complet", "Historique 7 jours", "Analyse corporelle limitée"],
+    en: ["3 analyses per month", "Full vocal report", "7-day history", "Limited body analysis"]
+  },
+  "pricing.tier.starter.cta":   { fr: "Commencer gratuitement", en: "Get started free" },
+  "pricing.tier.pro":           { fr: "Pro", en: "Pro" },
+  "pricing.tier.pro.priceM":    { fr: "29 MAD", en: "29 MAD" },
+  "pricing.tier.pro.priceA":    { fr: "23 MAD", en: "23 MAD" },
+  "pricing.tier.pro.perM":      { fr: "/ mois", en: "/ month" },
+  "pricing.tier.pro.perA":      { fr: "/ mois, facturé annuellement", en: "/ month, billed annually" },
+  "pricing.tier.pro.lede":      { fr: "Pour les orateurs qui veulent progresser sérieusement.", en: "For speakers who want serious progress." },
+  "pricing.tier.pro.items": {
+    fr: ["Analyses illimitées", "IA complète (Voix + Corps + Ton)", "Historique illimité & tendances", "Coaching personnalisé", "Export PDF & lien partage"],
+    en: ["Unlimited analyses", "Full AI (Voice + Body + Tone)", "Unlimited history & trends", "Personalized coaching", "PDF export & share link"]
+  },
+  "pricing.tier.pro.cta":       { fr: "Devenir Pro", en: "Go Pro" },
+  "pricing.tier.enterprise":    { fr: "Entreprise", en: "Enterprise" },
+  "pricing.tier.enterprise.price": { fr: "Sur devis", en: "Custom" },
+  "pricing.tier.enterprise.lede":  { fr: "Pour les écoles, équipes et programmes de formation.", en: "For schools, teams, and training programs." },
+  "pricing.tier.enterprise.items": {
+    fr: ["Sièges illimités", "SSO & SCIM", "Tableau de bord équipe", "Support dédié", "SLA & conformité (SOC 2)"],
+    en: ["Unlimited seats", "SSO & SCIM", "Team dashboard", "Dedicated support", "SLA & compliance (SOC 2)"]
+  },
+  "pricing.tier.enterprise.cta":   { fr: "Nous contacter", en: "Contact sales" },
+  "pricing.compare.title":  { fr: "Comparer les forfaits", en: "Compare plans" },
+  "pricing.compare.feature":{ fr: "Fonctionnalité", en: "Feature" },
+  "pricing.compare.rows": {
+    fr: [
+      { feature: "Analyses par mois",        starter: "3",        pro: "Illimité",   ent: "Illimité" },
+      { feature: "Analyse vocale",           starter: true,        pro: true,         ent: true },
+      { feature: "Analyse corporelle",       starter: "Limitée",   pro: true,         ent: true },
+      { feature: "Analyse du ton",           starter: false,       pro: true,         ent: true },
+      { feature: "Coaching personnalisé",    starter: false,       pro: true,         ent: true },
+      { feature: "Historique",               starter: "7 jours",   pro: "Illimité",   ent: "Illimité" },
+      { feature: "Export PDF",               starter: false,       pro: true,         ent: true },
+      { feature: "Tableau de bord équipe",   starter: false,       pro: false,        ent: true },
+      { feature: "SSO / SCIM",               starter: false,       pro: false,        ent: true },
+      { feature: "Support dédié",            starter: false,       pro: false,        ent: true },
+    ],
+    en: [
+      { feature: "Analyses per month",       starter: "3",         pro: "Unlimited",  ent: "Unlimited" },
+      { feature: "Voice analysis",           starter: true,        pro: true,         ent: true },
+      { feature: "Body analysis",            starter: "Limited",   pro: true,         ent: true },
+      { feature: "Tone analysis",            starter: false,       pro: true,         ent: true },
+      { feature: "Personalized coaching",    starter: false,       pro: true,         ent: true },
+      { feature: "History",                  starter: "7 days",    pro: "Unlimited",  ent: "Unlimited" },
+      { feature: "PDF export",               starter: false,       pro: true,         ent: true },
+      { feature: "Team dashboard",           starter: false,       pro: false,        ent: true },
+      { feature: "SSO / SCIM",               starter: false,       pro: false,        ent: true },
+      { feature: "Dedicated support",        starter: false,       pro: false,        ent: true },
+    ],
+  },
 
   "landing.faq.title":  { fr: "Questions fréquentes", en: "Frequently asked" },
   "landing.faq.q1":     { fr: "Mes vidéos sont-elles privées ?", en: "Are my videos private?" },

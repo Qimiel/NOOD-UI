@@ -1,15 +1,69 @@
 // Shared UI components — header, language toggle, dev pill toolbar, basic primitives
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useT } from './i18n.jsx'
 
-// ─── Logo ──────────────────────────────────────────────────────────────
-export function Logo({ size = 26, onClick }) {
-  // logo image is 563×345 wide-format and already contains the "NOOD" wordmark
-  const h = size
-  const w = h * (563 / 345)
+// ─── Reveal (fade-in on scroll) ───────────────────────────────────────
+// 400ms ease-out, 40px Y offset — per DESIGN.md §8 motion table.
+export function useReveal({ threshold = 0.12, rootMargin = "0px 0px -80px 0px", once = true } = {}) {
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    if (typeof IntersectionObserver === "undefined") { setVisible(true); return }
+    const obs = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          if (once) obs.unobserve(entry.target)
+        } else if (!once) {
+          setVisible(false)
+        }
+      }
+    }, { threshold, rootMargin })
+    obs.observe(node)
+    return () => obs.disconnect()
+  }, [threshold, rootMargin, once])
+  return [ref, visible]
+}
+
+export function Reveal({ children, delay = 0, as: Tag = "div", style, className = "", ...rest }) {
+  const [ref, visible] = useReveal()
   return (
-    <div onClick={onClick} style={{ display: "inline-flex", alignItems: "center", cursor: onClick ? "pointer" : "default", userSelect: "none" }}>
-      <img src="/assets/nood_logo.png" alt="NOOD" height={h} style={{ height: h, width: w, display: "block", objectFit: "contain" }} />
+    <Tag
+      ref={ref}
+      className={`reveal ${visible ? "is-visible" : ""} ${className}`.trim()}
+      style={{ transitionDelay: `${delay}ms`, ...style }}
+      {...rest}>
+      {children}
+    </Tag>
+  )
+}
+
+// ─── Logo ──────────────────────────────────────────────────────────────
+// The navbar logo enforces a 129×56 minimum (40px height on mobile) per TASKS.md §1.
+// `size` is treated as the rendered height; the natural aspect ratio is preserved
+// via object-fit, while min-width pads narrower wordmarks out to the spec.
+export function Logo({ size = 56, minWidth = 129, onClick, className = "" }) {
+  return (
+    <div onClick={onClick} className={`logo-wrap ${className}`.trim()} style={{
+      display: "inline-flex", alignItems: "center",
+      cursor: onClick ? "pointer" : "default", userSelect: "none",
+      padding: "8px 0",
+      flexShrink: 0,
+    }}>
+      <img
+        src="/assets/nood_logo.png"
+        alt="NOOD"
+        style={{
+          height: size,
+          minWidth,
+          width: "auto",
+          objectFit: "contain",
+          display: "block",
+          flexShrink: 0,
+        }}
+      />
     </div>
   )
 }
@@ -23,40 +77,13 @@ export function LangToggle() {
       <button key={l}
       onClick={() => setLang(l)}
       style={{
-        border: 0, background: lang === l ? "var(--ink)" : "transparent",
+        border: 0, background: lang === l ? "var(--ink-2)" : "transparent",
         color: lang === l ? "white" : "var(--muted)",
         fontFamily: "var(--body)", fontSize: 11, fontWeight: 600,
         padding: "5px 11px", borderRadius: 999, cursor: "pointer",
         textTransform: "uppercase", letterSpacing: "0.08em", transition: "all 0.15s"
       }}>
           {l === "en" ? "FR" : l}
-        </button>
-      )}
-    </div>)
-
-}
-
-// ─── Floating dev/edit pill (kept per user request) ───────────────────
-export function DevToolPill() {
-  const icons = ["chat_add_on", "lock", "content_copy", "delete", "more_horiz"]
-  return (
-    <div style={{
-      position: "fixed", top: 18, left: "50%", transform: "translateX(-50%)",
-      display: "flex", gap: 4, padding: 6,
-      background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
-      border: "1px solid var(--rule)", borderRadius: 999,
-      boxShadow: "0 6px 24px -8px rgba(15,8,102,0.14)", zIndex: 80
-    }}>
-      {icons.map((ic, i) =>
-      <button key={i} style={{
-        width: 32, height: 32, border: 0, background: "transparent",
-        borderRadius: 999, cursor: "pointer", color: "var(--ink)",
-        display: "inline-flex", alignItems: "center", justifyContent: "center"
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.background = "var(--hover)"}
-      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
-
-          <span className="icon" style={{ fontSize: 18 }}>{ic}</span>
         </button>
       )}
     </div>)
@@ -71,32 +98,40 @@ export function Header({ variant = "marketing", onNav, route, signedIn }) {
   return (
     <header style={{
       position: "sticky", top: 0, zIndex: 60,
-      background: "rgba(251,251,255,0.85)", backdropFilter: "blur(14px)",
-      borderBottom: "1px solid var(--rule)"
+      background: "rgba(255, 255, 255, 0.90)",
+      backdropFilter: "blur(12px) saturate(180%)",
+      WebkitBackdropFilter: "blur(12px) saturate(180%)",
+      borderBottom: "1px solid var(--rule-soft)"
     }}>
       <div style={{
         maxWidth: 1280, margin: "0 auto", padding: "14px 32px",
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24
       }}>
-        <Logo onClick={() => onNav(signedIn ? "history" : "landing")} />
+        <Logo className="navbar-logo" onClick={() => onNav(signedIn ? "history" : "landing")} />
 
         {!isApp ?
         <nav style={{ display: "flex", gap: 28, alignItems: "center" }}>
             {[
-          { id: "platform", label: t("nav.platform") },
-          { id: "services", label: t("nav.services") },
-          { id: "pricing", label: t("nav.pricing") },
-          { id: "about", label: t("nav.about") }].
-          map((item) =>
-          <a key={item.id} href={`#${item.id}`} style={{
-            color: "var(--ink)", textDecoration: "none", fontSize: 14, fontWeight: 500,
-            padding: "6px 0", borderBottom: "1.5px solid transparent",
-            transition: "border-color 0.15s"
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--ink)"}
-          onMouseLeave={(e) => e.currentTarget.style.borderColor = "transparent"}>
-            {item.label}</a>
-          )}
+          { id: "platform", label: t("nav.platform"), kind: "anchor" },
+          { id: "services", label: t("nav.services"), kind: "anchor" },
+          { id: "pricing", label: t("nav.pricing"), kind: "route" },
+          { id: "about", label: t("nav.about"), kind: "anchor" }].
+          map((item) => {
+            const sx = {
+              color: "var(--ink)", textDecoration: "none", fontSize: 14, fontWeight: 500,
+              padding: "6px 0", borderBottom: "1.5px solid transparent",
+              background: "transparent", border: 0, cursor: "pointer",
+              fontFamily: "var(--body)",
+              transition: "border-color 0.15s"
+            }
+            const onEnter = (e) => e.currentTarget.style.borderBottomColor = "var(--ink)"
+            const onLeave = (e) => e.currentTarget.style.borderBottomColor = "transparent"
+            return item.kind === "route"
+              ? <button key={item.id} onClick={() => onNav(item.id)} style={sx}
+                  onMouseEnter={onEnter} onMouseLeave={onLeave}>{item.label}</button>
+              : <a key={item.id} href={`#${item.id}`} style={sx}
+                  onMouseEnter={onEnter} onMouseLeave={onLeave}>{item.label}</a>
+          })}
           </nav> :
 
         <nav style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -109,7 +144,7 @@ export function Header({ variant = "marketing", onNav, route, signedIn }) {
               <button key={item.id} onClick={() => onNav(item.id)} style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 padding: "8px 14px", borderRadius: 999,
-                background: active ? "var(--ink)" : "transparent",
+                background: active ? "var(--ink-2)" : "transparent",
                 color: active ? "white" : "var(--ink)",
                 border: 0, fontSize: 13, fontWeight: 500, cursor: "pointer",
                 fontFamily: "var(--body)", transition: "all 0.15s"
@@ -127,11 +162,11 @@ export function Header({ variant = "marketing", onNav, route, signedIn }) {
           {!signedIn ?
           <>
               <button onClick={() => onNav("auth-signin")} style={{
-              border: "1px solid var(--rule)", background: "white", color: "var(--ink)",
+              border: "1.5px solid var(--rule)", background: "white", color: "var(--ink)",
               padding: "8px 16px", borderRadius: 999, fontWeight: 500, fontSize: 13, cursor: "pointer"
             }}>{t("nav.signin")}</button>
               <button onClick={() => onNav("auth-signup")} style={{
-              border: 0, background: "var(--ink)", color: "white",
+              border: 0, background: "var(--ink-2)", color: "white",
               padding: "9px 18px", borderRadius: 999, fontWeight: 500, fontSize: 13, cursor: "pointer"
             }}>{t("nav.signup")}</button>
             </> :
@@ -156,7 +191,7 @@ function UserMenu({ onNav }) {
     <div style={{ position: "relative" }}>
       <button onClick={() => setOpen((o) => !o)} style={{
         width: 36, height: 36, borderRadius: 999, border: "1px solid var(--rule)",
-        background: "linear-gradient(135deg, #6b5cff 0%, #0F0866 100%)",
+        background: "linear-gradient(135deg, #A06BD8 0%, #6C4ED2 50%, #0E1634 100%)",
         color: "white", fontWeight: 600, fontSize: 13, cursor: "pointer",
         fontFamily: "var(--display)"
       }}>SA</button>
@@ -197,16 +232,40 @@ function UserMenu({ onNav }) {
 }
 
 // ─── Card primitive ───────────────────────────────────────────────────
-export function Card({ children, style, padding = 24, hoverable, onClick }) {
+// `glass` switches to the frosted glass card style from DESIGN.md §5.
+// Hover (when `hoverable` or `onClick`) applies the 200ms lift defined in §8.
+export function Card({ children, style, padding = 24, hoverable, glass, onClick }) {
+  const interactive = hoverable || !!onClick
+  const base = glass
+    ? {
+        background: "var(--glass-bg)",
+        backdropFilter: "var(--backdrop)",
+        WebkitBackdropFilter: "var(--backdrop)",
+        border: "1px solid var(--glass-border)",
+        boxShadow: "var(--glass-shadow), 0 1px 0 rgba(255,255,255,0.6) inset",
+      }
+    : {
+        background: "var(--card)",
+        border: "1px solid var(--rule-soft)",
+        boxShadow: "0 1px 2px rgba(80, 70, 160, 0.04)",
+      }
   return (
     <div onClick={onClick} style={{
-      background: "var(--card)", border: "1px solid var(--rule)", borderRadius: 14,
-      padding, transition: "all 0.18s",
+      ...base,
+      borderRadius: 16,
+      padding,
+      transition: "transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out",
       cursor: onClick ? "pointer" : "default",
       ...style
     }}
-    onMouseEnter={hoverable ? (e) => e.currentTarget.style.borderColor = "var(--muted-2)" : undefined}
-    onMouseLeave={hoverable ? (e) => e.currentTarget.style.borderColor = "var(--rule)" : undefined}>
+    onMouseEnter={interactive ? (e) => {
+      e.currentTarget.style.transform = "translateY(-2px)"
+      e.currentTarget.style.boxShadow = "var(--glass-shadow-hover)"
+    } : undefined}
+    onMouseLeave={interactive ? (e) => {
+      e.currentTarget.style.transform = ""
+      e.currentTarget.style.boxShadow = base.boxShadow
+    } : undefined}>
       {children}</div>)
 
 }
@@ -218,8 +277,8 @@ export function Button({ children, kind = "primary", size = "md", icon, onClick,
     lg: { padding: "14px 24px", fontSize: 15, height: 50 }
   }
   const kinds = {
-    primary: { background: "var(--ink)", color: "white", border: "1px solid var(--ink)" },
-    ghost: { background: "transparent", color: "var(--ink)", border: "1px solid var(--rule)" },
+    primary: { background: "var(--ink-2)", color: "white", border: "1px solid var(--ink-2)" },
+    ghost: { background: "transparent", color: "var(--ink)", border: "1.5px solid var(--rule)" },
     quiet: { background: "transparent", color: "var(--ink)", border: "1px solid transparent" },
     invert: { background: "white", color: "var(--ink)", border: "1px solid white" }
   }
@@ -241,8 +300,8 @@ export function Button({ children, kind = "primary", size = "md", icon, onClick,
 }
 
 // ─── Eyebrow / labels ────────────────────────────────────────────────
-export function Eyebrow({ children, style }) {
-  return <div className="eyebrow" style={style}>{children}</div>
+export function Eyebrow({ children, style, className = "" }) {
+  return <div className={`eyebrow ${className}`.trim()} style={style}>{children}</div>
 }
 
 // ─── Sparkline ────────────────────────────────────────────────────────

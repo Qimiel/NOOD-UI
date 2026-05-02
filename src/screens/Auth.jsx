@@ -136,8 +136,8 @@ export default function Auth({ mode = "signin", onNav }) {
       </div>
 
       {/* Right — editorial */}
-      <div style={{ background: "var(--ink)", color: "white", padding: 48, display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle at 20% 30%, white 0, transparent 40%), radial-gradient(circle at 80% 70%, #6b5cff 0, transparent 40%)" }} />
+      <div style={{ background: "var(--ink-2)", color: "white", padding: 48, display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, opacity: 0.10, backgroundImage: "radial-gradient(circle at 20% 30%, #A06BD8 0, transparent 45%), radial-gradient(circle at 80% 70%, #6C4ED2 0, transparent 45%)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <Logo size={36} />
         </div>
@@ -149,7 +149,7 @@ export default function Auth({ mode = "signin", onNav }) {
               : "“In four weeks, my average score went from 58 to 74. More importantly — I now know why.”"}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 999, background: "linear-gradient(135deg, #6b5cff, #3CC58F)" }} />
+            <div style={{ width: 40, height: 40, borderRadius: 999, background: "linear-gradient(135deg, #A06BD8, #6C4ED2)" }} />
             <div>
               <div style={{ fontWeight: 600, fontSize: 14 }}>Yassine Bennani</div>
               <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>ENSEIRB · Promo 2026</div>

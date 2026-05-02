@@ -98,7 +98,7 @@ export default function Report({ onNav, report }) {
 
         {/* Video */}
         <Card padding={0} style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <div style={{ position: "relative", aspectRatio: "16/9", background: "linear-gradient(135deg, #1a1372 0%, #0F0866 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ position: "relative", aspectRatio: "16/9", background: "linear-gradient(135deg, #2A325E 0%, #0E1634 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <button onClick={() => setPlaying(p => !p)} style={{
               width: 64, height: 64, borderRadius: 999, border: 0,
               background: "rgba(255,255,255,0.96)", cursor: "pointer",

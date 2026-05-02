@@ -1,15 +1,16 @@
 // App shell — routing + tweaks + auth
 import { useState, useCallback, useEffect } from 'react'
 import { I18nProvider } from './i18n.jsx'
-import { Header, DevToolPill } from './components.jsx'
+import { Header } from './components.jsx'
 import Landing from './screens/Landing.jsx'
+import Pricing from './screens/Pricing.jsx'
 import Auth from './screens/Auth.jsx'
 import Workspace from './screens/Workspace.jsx'
 import Processing from './screens/Processing.jsx'
 import Report from './screens/Report.jsx'
 import History from './screens/History.jsx'
 import {
-  TweaksPanel, TweakSection, TweakSelect, TweakToggle, TweakRadio, useTweaks,
+  TweaksPanel, TweakSection, TweakSelect, TweakRadio, useTweaks,
 } from './tweaks/TweaksPanel.jsx'
 import { AuthProvider, useAuth } from './auth/AuthContext.jsx'
 
@@ -17,7 +18,6 @@ const SHOW_DEV_UI =
   import.meta.env.DEV || import.meta.env.VITE_DEV_MODE === 'true'
 
 const TWEAK_DEFAULTS = {
-  showDevPill: true,
   defaultLang: 'fr',
   startScreen: 'landing',
 }
@@ -62,9 +62,9 @@ function AppShell() {
 
   return (
     <I18nProvider defaultLang={tweaks.defaultLang || 'fr'}>
-      {SHOW_DEV_UI && tweaks.showDevPill && <DevToolPill />}
       {showHeader && <Header variant={isAppShell ? 'app' : 'marketing'} route={route} signedIn={signedIn} onNav={onNav} />}
       {route === 'landing'    && <Landing onNav={onNav} />}
+      {route === 'pricing'    && <Pricing onNav={onNav} />}
       {route === 'auth'       && <Auth mode={authMode} onNav={onNav} />}
       {route === 'workspace'  && <Workspace onNav={onNav} fileState={fileState} setFileState={setFileState} />}
       {route === 'processing' && <Processing onNav={onNav} />}
@@ -77,6 +77,7 @@ function AppShell() {
           <TweakSection label="Demo controls">
             <TweakSelect label="Jump to screen" value={route} onChange={(v) => onNav(v)} options={[
               { value: 'landing', label: 'Landing' },
+              { value: 'pricing', label: 'Pricing' },
               { value: 'auth', label: 'Auth' },
               { value: 'workspace', label: 'Workspace' },
               { value: 'processing', label: 'Processing' },
@@ -85,7 +86,6 @@ function AppShell() {
             ]} />
           </TweakSection>
           <TweakSection label="Display">
-            <TweakToggle label="Show dev tool pill" value={tweaks.showDevPill} onChange={(v) => setTweak('showDevPill', v)} />
             <TweakRadio label="Default language" value={tweaks.defaultLang} onChange={(v) => setTweak('defaultLang', v)} options={[
               { value: 'fr', label: 'FR' },
               { value: 'en', label: 'EN' },
