@@ -72,7 +72,7 @@ export default function Auth({ mode = "signin", onNav }) {
   }
 
   return (
-    <div className="fade-in" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 70px)" }}>
+    <div className="fade-in" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - var(--navbar-height))" }}>
       {/* Left — form */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 48 }}>
         <div style={{ width: "100%", maxWidth: 380 }}>
@@ -84,10 +84,10 @@ export default function Auth({ mode = "signin", onNav }) {
             {t("common.back")}
           </button>
 
-          <h1 className="display" style={{ fontSize: 36, margin: "0 0 10px" }}>
+          <h1 className="display" style={{ fontSize: 38, margin: "0 0 10px" }}>
             {m === "signin" ? t("auth.signin.title") : t("auth.signup.title")}
           </h1>
-          <p style={{ color: "var(--muted)", fontSize: 15, margin: "0 0 36px" }}>
+          <p style={{ color: "var(--muted)", fontSize: 17, margin: "0 0 36px" }}>
             {m === "signin" ? t("auth.signin.lede") : t("auth.signup.lede")}
           </p>
 

@@ -11,22 +11,22 @@ export default function Pricing({ onNav }) {
   const proPer   = annual ? t("pricing.tier.pro.perA")   : t("pricing.tier.pro.perM")
 
   return (
-    <div className="fade-in" style={{ background: "var(--bg)" }}>
+    <div className="fade-in">
       {/* HERO */}
-      <section style={{ padding: "80px 24px 24px", textAlign: "center", background: "var(--bg)" }}>
+      <section style={{ padding: "140px 80px 24px", textAlign: "center", background: "transparent" }}>
         <h1 className="display" style={{
-          fontSize: 48, fontWeight: 700, color: "var(--ink)",
+          fontSize: 50, fontWeight: 700, color: "var(--ink)",
           maxWidth: 640, margin: "0 auto 16px", letterSpacing: "-0.025em",
         }}>{t("pricing.hero.title")}</h1>
         <p style={{
-          fontSize: 17, color: "var(--muted)",
+          fontSize: 19, color: "var(--muted)",
           maxWidth: 480, margin: "0 auto", lineHeight: 1.6,
         }}>{t("pricing.hero.lede")}</p>
 
         {/* Billing toggle */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-          margin: "32px 0 0", fontSize: 15, color: "var(--muted)",
+          margin: "32px 0 0", fontSize: 17, color: "var(--muted)",
         }}>
           <span style={{ color: !annual ? "var(--ink)" : "var(--muted)", fontWeight: !annual ? 600 : 400 }}>
             {t("pricing.billing.monthly")}
@@ -51,7 +51,7 @@ export default function Pricing({ onNav }) {
             {t("pricing.billing.annual")}
           </span>
           <span style={{
-            fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 999,
+            fontSize: 13, fontWeight: 600, padding: "4px 10px", borderRadius: 999,
             background: "rgba(76, 190, 110, 0.12)",
             color: "rgb(40, 150, 70)",
             border: "1px solid rgba(76, 190, 110, 0.30)",
@@ -61,10 +61,10 @@ export default function Pricing({ onNav }) {
       </section>
 
       {/* PRICING GRID */}
-      <Reveal as="section" style={{ padding: "32px 0 80px" }}>
+      <Reveal as="section" style={{ padding: "32px 0 80px", background: "transparent" }}>
         <div className="pricing-grid" style={{
           display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 24, maxWidth: 1080, margin: "0 auto", padding: "0 24px",
+          gap: 48, maxWidth: 1100, margin: "0 auto", padding: "0 80px",
         }}>
           {/* Starter */}
           <PlanCard
@@ -107,10 +107,10 @@ export default function Pricing({ onNav }) {
       </Reveal>
 
       {/* COMPARISON TABLE */}
-      <Reveal as="section" style={{ padding: "0 24px 80px" }}>
+      <Reveal as="section" style={{ padding: "0 80px 120px", background: "transparent" }}>
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
           <h2 style={{
-            fontFamily: "var(--display)", fontSize: 22, fontWeight: 600,
+            fontFamily: "var(--display)", fontSize: 24, fontWeight: 600,
             color: "var(--ink)", margin: "0 0 24px", letterSpacing: "-0.01em",
           }}>{t("pricing.compare.title")}</h2>
           <div style={{ overflowX: "auto" }}>
@@ -120,7 +120,7 @@ export default function Pricing({ onNav }) {
                   {[t("pricing.compare.feature"), t("pricing.tier.starter"), t("pricing.tier.pro"), t("pricing.tier.enterprise")].map((h, i) => (
                     <th key={i} style={{
                       textAlign: i === 0 ? "left" : "center",
-                      fontSize: 12, fontWeight: 600, letterSpacing: "0.05em",
+                      fontSize: 14, fontWeight: 600, letterSpacing: "0.05em",
                       textTransform: "uppercase", color: "var(--muted-2)",
                       padding: "0 12px 12px", borderBottom: "1px solid rgba(200, 198, 220, 0.40)",
                     }}>{h}</th>
@@ -130,10 +130,10 @@ export default function Pricing({ onNav }) {
               <tbody>
                 {STRINGS["pricing.compare.rows"][lang].map((row, i) => (
                   <tr key={i}>
-                    <td style={{ padding: "14px 12px", fontSize: 14, color: "var(--ink)", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}>{row.feature}</td>
-                    <td style={{ padding: "14px 12px", fontSize: 14, color: "var(--muted)", textAlign: "center", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}><Cell v={row.starter} /></td>
-                    <td style={{ padding: "14px 12px", fontSize: 14, color: "var(--muted)", textAlign: "center", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}><Cell v={row.pro} /></td>
-                    <td style={{ padding: "14px 12px", fontSize: 14, color: "var(--muted)", textAlign: "center", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}><Cell v={row.ent} /></td>
+                    <td style={{ padding: "14px 12px", fontSize: 16, color: "var(--ink)", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}>{row.feature}</td>
+                    <td style={{ padding: "14px 12px", fontSize: 16, color: "var(--muted)", textAlign: "center", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}><Cell v={row.starter} /></td>
+                    <td style={{ padding: "14px 12px", fontSize: 16, color: "var(--muted)", textAlign: "center", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}><Cell v={row.pro} /></td>
+                    <td style={{ padding: "14px 12px", fontSize: 16, color: "var(--muted)", textAlign: "center", borderBottom: "1px solid rgba(200, 198, 220, 0.25)" }}><Cell v={row.ent} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -142,10 +142,10 @@ export default function Pricing({ onNav }) {
         </div>
       </Reveal>
 
-      {/* FOOTER */}
-      <Reveal as="footer" style={{
-        padding: "64px 32px 32px",
-        background: "linear-gradient(to bottom, var(--bg-2) 0%, var(--bg) 100%)",
+      {/* FOOTER — transparent, body gradient lands on it (TASKS_3.md §5) */}
+      <Reveal as="footer" className="footer" style={{
+        padding: "100px 80px 32px",
+        background: "transparent",
       }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48 }}>
           <div>
@@ -213,7 +213,7 @@ function PlanCard({ tier, name, price, per, lede, items, cta, ctaKind, popular, 
 
   const ctaBase = {
     width: "100%", padding: "12px 0", borderRadius: 999,
-    fontSize: 15, fontWeight: 600, textAlign: "center",
+    fontSize: 17, fontWeight: 600, textAlign: "center",
     fontFamily: "var(--body)", cursor: "pointer",
     transition: "opacity 150ms, background 150ms",
     border: "1.5px solid transparent",
@@ -232,31 +232,31 @@ function PlanCard({ tier, name, price, per, lede, items, cta, ctaKind, popular, 
           padding: "4px 10px", borderRadius: 999,
           background: "rgba(108, 78, 210, 0.12)",
           color: "var(--accent)",
-          fontSize: 11, fontWeight: 600,
+          fontSize: 13, fontWeight: 600,
           letterSpacing: "0.06em", textTransform: "uppercase",
           border: "1px solid rgba(108, 78, 210, 0.25)",
         }}>{popular}</span>
       )}
 
       <div style={{
-        fontSize: 13, fontWeight: 600, letterSpacing: "0.05em",
+        fontSize: 15, fontWeight: 600, letterSpacing: "0.05em",
         color: "var(--muted-2)", textTransform: "uppercase",
       }}>{name}</div>
 
       <div>
         <div style={{
-          fontFamily: "var(--display)", fontSize: 44, fontWeight: 700,
+          fontFamily: "var(--display)", fontSize: 46, fontWeight: 700,
           color: "var(--ink)", lineHeight: 1, letterSpacing: "-0.025em",
         }}>
           {price}
-          {per && <span style={{ fontSize: 16, fontWeight: 400, color: "var(--muted)", marginLeft: 4 }}>{per}</span>}
+          {per && <span style={{ fontSize: 18, fontWeight: 400, color: "var(--muted)", marginLeft: 4 }}>{per}</span>}
         </div>
-        {lede && <p style={{ fontSize: 14, color: "var(--muted)", margin: "12px 0 0", lineHeight: 1.5 }}>{lede}</p>}
+        {lede && <p style={{ fontSize: 16, color: "var(--muted)", margin: "12px 0 0", lineHeight: 1.5 }}>{lede}</p>}
       </div>
 
       <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
         {items.map((it, i) => (
-          <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "var(--muted)", lineHeight: 1.5 }}>
+          <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 16, color: "var(--muted)", lineHeight: 1.5 }}>
             <span style={{ color: "var(--accent)", fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
             <span>{it}</span>
           </li>

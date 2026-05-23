@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scene-to-Asset Pipeline Presentation</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]]
+      },
+      svg: { fontCache: "global" }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      --ink: #181818;
+      --body: #4a4a46;
+      --muted: #73706a;
+      --line: #ded8cf;
+      --paper: #fbfaf7;
+      --panel: #f1ece4;
+      --accent: #c66f53;
+      --accent-2: #327a6d;
+      --dark: #1d1c1a;
+      --dark-soft: #a9a49a;
+      --ok: #5e9c6c;
+      --warn: #c89538;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--dark);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      padding: clamp(28px, 4vw, 56px);
+      background: var(--paper);
+      overflow: auto;
+    }
+
+    .slide.active {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 24px;
+    }
+
+    .slide.dark {
+      background: var(--dark);
+      color: #f8f4ec;
+    }
+
+    .kicker {
+      color: var(--accent);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: .08em;
+      font-size: 13px;
+    }
+
+    h1, h2, h3, p { margin: 0; letter-spacing: 0; }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: clamp(48px, 7vw, 92px);
+      line-height: .96;
+      max-width: 980px;
+    }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      font-size: clamp(34px, 4.7vw, 62px);
+      line-height: 1.02;
+      max-width: 1000px;
+    }
+
+    h3 {
+      font-size: 17px;
+      line-height: 1.25;
+      font-weight: 750;
+    }
+
+    p, li {
+      font-size: clamp(16px, 1.7vw, 22px);
+      line-height: 1.5;
+      color: var(--body);
+    }
+
+    .dark p, .dark li { color: #d9d2c7; }
+    .dark .muted { color: var(--dark-soft); }
+
+    ul {
+      margin: 0;
+      padding-left: 1.2em;
+    }
+
+    code {
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .9em;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      min-height: 24px;
+    }
+
+    .number {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dark .number { color: var(--dark-soft); }
+
+    .content {
+      display: grid;
+      align-content: center;
+      gap: 26px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+      gap: 34px;
+      align-items: center;
+    }
+
+    .three {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .dark .panel {
+      background: #2a2824;
+      border-color: #3b3832;
+    }
+
+    .compact {
+      display: grid;
+      gap: 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: clamp(14px, 1.3vw, 17px);
+      line-height: 1.45;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #fffdf9;
+      color: var(--body);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .dark .pill {
+      background: #2b2925;
+      border-color: #423f39;
+      color: #eee7dc;
+    }
+
+    .formula {
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-size: 18px;
+    }
+
+    .dark .formula {
+      background: #272520;
+      border-color: #3b3832;
+      color: #fffaf0;
+    }
+
+    .diagram {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .dark .footer {
+      border-color: #38352f;
+      color: var(--dark-soft);
+    }
+
+    .controls {
+      position: fixed;
+      right: 22px;
+      bottom: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    button {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(29,28,26,.88);
+      color: #fff7eb;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .42;
+      cursor: default;
+    }
+
+    .progress {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      height: 4px;
+      width: 100%;
+      background: rgba(0,0,0,.18);
+      z-index: 19;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 160ms ease;
+    }
+
+    .examples {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .example-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+    }
+
+    figure {
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .shot {
+      width: 100%;
+      height: clamp(110px, 18vh, 190px);
+      object-fit: contain;
+      background: #111;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .source-only .shot {
+      background: #f7f1e7;
+    }
+
+    figcaption {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .arrow-svg {
+      width: 70px;
+      height: 42px;
+    }
+
+    .mini-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      align-items: end;
+    }
+
+    .mini-gallery .shot {
+      height: clamp(100px, 17vh, 170px);
+    }
+
+    .example-showcase {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 86px minmax(0, 1fr);
+      gap: clamp(18px, 2.4vw, 34px);
+      align-items: center;
+    }
+
+    .example-card {
+      display: grid;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .example-shot {
+      width: 100%;
+      height: min(66vh, 640px);
+      object-fit: contain;
+      background: #111;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .example-arrow {
+      width: 86px;
+      height: 64px;
+    }
+
+    .example-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding-left: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .term-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .term {
+      display: grid;
+      gap: 8px;
+      border-top: 2px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .term strong {
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .dark .term strong { color: #fff7eb; }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .deck { height: auto; min-height: 100vh; }
+      .slide {
+        position: relative;
+        min-height: 100vh;
+        display: grid;
+      }
+      .slide:not(.active) { display: none; }
+      .split, .two, .three, .term-grid { grid-template-columns: 1fr; }
+      .example-showcase { grid-template-columns: 1fr; }
+      .example-row { grid-template-columns: 1fr; }
+      .arrow-svg, .example-arrow {
+        transform: rotate(90deg);
+        margin: 0 auto;
+      }
+      .mini-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media print {
+      body { overflow: visible; background: white; }
+      .slide {
+        position: relative;
+        display: grid !important;
+        min-height: 100vh;
+        page-break-after: always;
+      }
+      .controls, .progress { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" id="deck">
+    <section class="slide dark active">
+      <div class="topline">
+        <div class="kicker">Scene-to-Asset</div>
+        <div class="number">01 / 13</div>
+      </div>
+      <div class="content">
+        <h1>3D Reconstruction Pipeline and Architecture</h1>
+        <p class="muted">A clean technical overview of the project, its staged asset pipeline, the NeRF neural-network backend, and the math behind volumetric view synthesis.</p>
+      </div>
+      <div class="footer">
+        <span>Local project: <code>scene_to_asset</code></span>
+        <span>HTML + LaTeX + SVG</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Problem Shape</div>
+        <div class="number">02 / 13</div>
+      </div>
+      <div class="content split">
+        <div class="compact">
+          <h2>From scene media to a usable asset</h2>
+          <p>The system accepts ordinary media, isolates the target object, creates a clean object view, reconstructs geometry and appearance, then exports a final asset with a report.</p>
+          <div class="callout">
+            <h3>Important boundary</h3>
+            <p class="muted">The NeRF neural-network backend consumes selected object views, estimates a radiance field, and exports geometry and appearance through the asset pipeline.</p>
+          </div>
+        </div>
+        <svg class="diagram" viewBox="0 0 820 500" role="img" aria-label="High level pipeline diagram">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#c66f53"></path>
+            </marker>
+            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".12"></feDropShadow>
+            </filter>
+          </defs>
+          <rect x="20" y="35" width="780" height="420" rx="18" fill="#f1ece4" stroke="#ded8cf"></rect>
+          <g filter="url(#softShadow)">
+            <rect x="58" y="92" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+            <rect x="242" y="92" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+            <rect x="426" y="92" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+            <rect x="610" y="92" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+            <rect x="150" y="268" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+            <rect x="334" y="268" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+            <rect x="518" y="268" width="155" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          </g>
+          <g fill="#181818" font-family="Inter, sans-serif" font-weight="700" font-size="17" text-anchor="middle">
+            <text x="135" y="128">Input</text>
+            <text x="135" y="152" fill="#73706a" font-size="13">image / video</text>
+            <text x="319" y="128">Select</text>
+            <text x="319" y="152" fill="#73706a" font-size="13">text / bbox / auto</text>
+            <text x="504" y="128">Segment</text>
+            <text x="504" y="152" fill="#73706a" font-size="13">SAM2 / rembg</text>
+            <text x="688" y="128">Crop</text>
+            <text x="688" y="152" fill="#73706a" font-size="13">square RGBA</text>
+            <text x="228" y="304">Rank Views</text>
+            <text x="228" y="328" fill="#73706a" font-size="13">quality + diversity</text>
+            <text x="412" y="304">Backend</text>
+            <text x="412" y="328" fill="#73706a" font-size="13">NeRF neural network</text>
+            <text x="596" y="304">Export</text>
+            <text x="596" y="328" fill="#73706a" font-size="13">GLB / OBJ + report</text>
+          </g>
+          <g fill="none" stroke="#c66f53" stroke-width="3" marker-end="url(#arrow)">
+            <path d="M213 133 H239"></path>
+            <path d="M397 133 H423"></path>
+            <path d="M581 133 H607"></path>
+            <path d="M688 174 C688 230 228 220 228 264"></path>
+            <path d="M305 309 H331"></path>
+            <path d="M489 309 H515"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="footer">
+        <span>Pipeline stages are explicit and testable.</span>
+        <span><code>reconstruct.py</code> calls <code>reconstruct_object()</code></span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Runtime Pipeline</div>
+        <div class="number">03 / 13</div>
+      </div>
+      <div class="content">
+        <h2>Stage responsibilities</h2>
+        <div class="three">
+          <div class="panel compact">
+            <h3>1. Input and intent</h3>
+            <p class="muted">The loader discovers frames from a file, folder, or video. The selector interprets user intent through text, bbox, point, or auto foreground mode.</p>
+            <div class="formula">\( \texttt{path} \rightarrow \{I_i, t_i, \mathrm{metadata}_i\}_{i=1}^{N} \)</div>
+          </div>
+          <div class="panel compact">
+            <h3>2. Mask and view prep</h3>
+            <p class="muted">SAM2 or rembg creates object masks. The preprocessor crops, pads, centers, and writes RGBA object views for reconstruction.</p>
+            <div class="formula">\( (I_i, M_i) \rightarrow V_i = \mathrm{resize}(\mathrm{crop}_{M_i}(I_i)) \)</div>
+          </div>
+          <div class="panel compact">
+            <h3>3. Reconstruct and report</h3>
+            <p class="muted">The NeRF backend produces geometry and appearance; postprocess normalizes and cleans the result; the exporter writes GLB/OBJ and a JSON report.</p>
+            <div class="formula">\( V^\star \rightarrow (\mathcal{M}, \mathcal{T}) \rightarrow \texttt{asset.glb} \)</div>
+          </div>
+        </div>
+        <svg class="diagram" viewBox="0 0 1040 220" role="img" aria-label="Pipeline quality gates">
+          <defs>
+            <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#327a6d"></path>
+            </marker>
+          </defs>
+          <rect x="20" y="28" width="1000" height="152" rx="16" fill="#f1ece4" stroke="#ded8cf"></rect>
+          <g font-family="Inter, sans-serif" font-size="14" text-anchor="middle">
+            <g>
+              <circle cx="110" cy="104" r="42" fill="#fffdf9" stroke="#ded8cf"></circle>
+              <text x="110" y="100" font-weight="700">Frames</text>
+              <text x="110" y="120" fill="#73706a">manifest</text>
+            </g>
+            <g>
+              <circle cx="290" cy="104" r="42" fill="#fffdf9" stroke="#ded8cf"></circle>
+              <text x="290" y="100" font-weight="700">Candidates</text>
+              <text x="290" y="120" fill="#73706a">scores</text>
+            </g>
+            <g>
+              <circle cx="470" cy="104" r="42" fill="#fffdf9" stroke="#ded8cf"></circle>
+              <text x="470" y="100" font-weight="700">Masks</text>
+              <text x="470" y="120" fill="#73706a">quality</text>
+            </g>
+            <g>
+              <circle cx="650" cy="104" r="42" fill="#fffdf9" stroke="#ded8cf"></circle>
+              <text x="650" y="100" font-weight="700">Views</text>
+              <text x="650" y="120" fill="#73706a">ranked</text>
+            </g>
+            <g>
+              <circle cx="830" cy="104" r="42" fill="#fffdf9" stroke="#ded8cf"></circle>
+              <text x="830" y="100" font-weight="700">Mesh</text>
+              <text x="830" y="120" fill="#73706a">validated</text>
+            </g>
+          </g>
+          <g fill="none" stroke="#327a6d" stroke-width="3" marker-end="url(#arrow2)">
+            <path d="M153 104 H244"></path>
+            <path d="M333 104 H424"></path>
+            <path d="M513 104 H604"></path>
+            <path d="M693 104 H784"></path>
+          </g>
+          <g fill="#73706a" font-family="Inter, sans-serif" font-size="13" text-anchor="middle">
+            <text x="200" y="82">select</text>
+            <text x="380" y="82">segment</text>
+            <text x="560" y="82">crop</text>
+            <text x="740" y="82">backend</text>
+            <text x="830" y="168">report links warnings + debug artifacts</text>
+          </g>
+        </svg>
+      </div>
+      <div class="footer">
+        <span>Each stage emits typed contracts rather than loose path conventions.</span>
+        <span>Debug output: frames, masks, crops, backend logs, mesh</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Architecture</div>
+        <div class="number">04 / 13</div>
+      </div>
+      <div class="content split">
+        <svg class="diagram" viewBox="0 0 760 560" role="img" aria-label="Project architecture diagram">
+          <defs>
+            <marker id="arrow3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#c66f53"></path>
+            </marker>
+          </defs>
+          <rect x="30" y="26" width="700" height="500" rx="18" fill="#f1ece4" stroke="#ded8cf"></rect>
+          <rect x="75" y="68" width="250" height="72" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="435" y="68" width="250" height="72" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="215" y="200" width="330" height="86" rx="8" fill="#1d1c1a" stroke="#1d1c1a"></rect>
+          <rect x="75" y="354" width="170" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="295" y="354" width="170" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="515" y="354" width="170" height="82" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <g font-family="Inter, sans-serif" text-anchor="middle">
+            <text x="200" y="100" font-weight="800" font-size="18">CLI</text>
+            <text x="200" y="123" fill="#73706a" font-size="13">reconstruct.py / batch.py</text>
+            <text x="560" y="100" font-weight="800" font-size="18">GUI</text>
+            <text x="560" y="123" fill="#73706a" font-size="13">local browser wrapper</text>
+            <text x="380" y="235" font-weight="800" font-size="20" fill="#fffaf0">Pipeline Orchestrator</text>
+            <text x="380" y="260" font-size="13" fill="#a9a49a">scene_to_asset.pipeline.reconstruct_object()</text>
+            <text x="160" y="388" font-weight="800" font-size="17">Contracts</text>
+            <text x="160" y="412" fill="#73706a" font-size="13">InputFrame, ObjectView</text>
+            <text x="380" y="388" font-weight="800" font-size="17">NeRF Backend</text>
+            <text x="380" y="412" fill="#73706a" font-size="13">radiance field + mesh</text>
+            <text x="600" y="388" font-weight="800" font-size="17">Report</text>
+            <text x="600" y="412" fill="#73706a" font-size="13">score + warnings</text>
+          </g>
+          <g fill="none" stroke="#c66f53" stroke-width="3" marker-end="url(#arrow3)">
+            <path d="M200 140 C200 170 300 170 350 198"></path>
+            <path d="M560 140 C560 170 460 170 410 198"></path>
+            <path d="M360 286 C260 306 180 318 160 350"></path>
+            <path d="M380 286 V350"></path>
+            <path d="M400 286 C500 306 580 318 600 350"></path>
+          </g>
+          <g fill="#327a6d" font-family="Inter, sans-serif" font-size="13" font-weight="700" text-anchor="middle">
+            <text x="380" y="487">The NeRF backend stays behind the pipeline protocol boundary.</text>
+          </g>
+        </svg>
+        <div class="compact">
+          <h2>Typed contracts keep stages replaceable</h2>
+          <p>Input, selection, segmentation, view preparation, reconstruction, mesh cleanup, and export exchange explicit dataclasses.</p>
+          <div class="term-grid">
+            <div class="term">
+              <strong>ObjectCandidate</strong>
+              <p class="muted">Target bbox, label, selection confidence, and frame id.</p>
+            </div>
+            <div class="term">
+              <strong>ObjectView</strong>
+              <p class="muted">RGBA crop, mask path, bbox, source frame, and quality metrics.</p>
+            </div>
+            <div class="term">
+              <strong>ReconstructionResult</strong>
+              <p class="muted">Mesh path, texture paths, backend name, runtime, stats, warnings.</p>
+            </div>
+            <div class="term">
+              <strong>Report</strong>
+              <p class="muted">Status, selected/rejected views, backend metadata, score, artifacts.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>The NeRF backend is exposed through <code>register_backend()</code>.</span>
+        <span>GUI and CLI share the same pipeline API.</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">NeRF Backend</div>
+        <div class="number">05 / 13</div>
+      </div>
+      <div class="content split">
+        <div class="compact">
+          <h2>A NeRF neural network turns selected views into geometry</h2>
+          <p>The backend trains or evaluates a neural radiance field \(F_\theta\), renders novel views through differentiable volume integration, and extracts a mesh for export.</p>
+          <div class="formula">
+            \[
+              B_{\mathrm{NeRF}} :
+              \{V_i,\Pi_i\}_{i=1}^{m}
+              \mapsto F_\theta
+              \mapsto \left(\mathcal{M}, \mathcal{T}, s\right)
+            \]
+          </div>
+        </div>
+        <svg class="diagram" viewBox="0 0 800 520" role="img" aria-label="NeRF backend architecture graph">
+          <defs>
+            <marker id="arrow4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#327a6d"></path>
+            </marker>
+          </defs>
+          <rect x="34" y="36" width="732" height="420" rx="18" fill="#f1ece4" stroke="#ded8cf"></rect>
+          <rect x="70" y="90" width="190" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="306" y="90" width="190" height="76" rx="8" fill="#1d1c1a" stroke="#1d1c1a"></rect>
+          <rect x="542" y="90" width="190" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="94" y="266" width="160" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="320" y="266" width="160" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="546" y="266" width="160" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <g font-family="Inter, sans-serif" text-anchor="middle">
+            <text x="165" y="122" font-weight="800" font-size="17">Selected Views</text>
+            <text x="165" y="146" fill="#73706a" font-size="13">RGBA crops + poses</text>
+            <text x="401" y="122" font-weight="800" font-size="17" fill="#fffaf0">NeRF Network</text>
+            <text x="401" y="146" fill="#a9a49a" font-size="13">density + color field</text>
+            <text x="637" y="122" font-weight="800" font-size="17">Postprocess</text>
+            <text x="637" y="146" fill="#73706a" font-size="13">clean + normalize</text>
+            <text x="174" y="298" font-weight="800" font-size="16">Ray Sampling</text>
+            <text x="174" y="322" fill="#73706a" font-size="13">camera rays</text>
+            <text x="400" y="298" font-weight="800" font-size="16">Volume Render</text>
+            <text x="400" y="322" fill="#73706a" font-size="13">differentiable pixels</text>
+            <text x="626" y="298" font-weight="800" font-size="16">Mesh Extract</text>
+            <text x="626" y="322" fill="#73706a" font-size="13">density to surface</text>
+          </g>
+          <g fill="none" stroke="#327a6d" stroke-width="3" marker-end="url(#arrow4)">
+            <path d="M260 128 H302"></path>
+            <path d="M496 128 H538"></path>
+            <path d="M401 166 V226"></path>
+            <path d="M401 226 C310 226 174 226 174 262"></path>
+            <path d="M401 226 V262"></path>
+            <path d="M401 226 C492 226 626 226 626 262"></path>
+          </g>
+          <text x="400" y="410" fill="#73706a" font-family="Inter, sans-serif" font-size="14" text-anchor="middle">
+            The rest of the pipeline works with the exported mesh and texture artifacts.
+          </text>
+        </svg>
+      </div>
+      <div class="footer">
+        <span>The backend is a NeRF-style neural radiance field.</span>
+        <span>Textures and geometry are inferred from the learned field.</span>
+      </div>
+    </section>
+
+    <section class="slide dark">
+      <div class="topline">
+        <div class="kicker">NeRF Concept</div>
+        <div class="number">06 / 13</div>
+      </div>
+      <div class="content split">
+        <div class="compact">
+          <h2>A NeRF is a continuous radiance field</h2>
+          <p>Instead of storing triangles, a neural network represents color and density at every 3D location, conditioned on viewing direction.</p>
+          <div class="formula">
+            \[
+              F_\theta\big(\gamma(\mathbf{x}), \gamma(\mathbf{d})\big)
+              = \left(\sigma, \mathbf{c}\right)
+            \]
+          </div>
+          <p class="muted">Here \(\mathbf{x}\in\mathbb{R}^3\) is a point in space, \(\mathbf{d}\in\mathbb{S}^2\) is a camera ray direction, \(\sigma\) is volume density, and \(\mathbf{c}\in[0,1]^3\) is emitted color.</p>
+        </div>
+        <svg class="diagram" viewBox="0 0 780 520" role="img" aria-label="NeRF ray through volume">
+          <defs>
+            <radialGradient id="volume" cx="50%" cy="50%" r="52%">
+              <stop offset="0%" stop-color="#c66f53" stop-opacity=".9"></stop>
+              <stop offset="50%" stop-color="#c66f53" stop-opacity=".35"></stop>
+              <stop offset="100%" stop-color="#c66f53" stop-opacity=".04"></stop>
+            </radialGradient>
+            <marker id="arrow5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#fff0df"></path>
+            </marker>
+          </defs>
+          <rect x="30" y="36" width="720" height="420" rx="18" fill="#272520" stroke="#3b3832"></rect>
+          <ellipse cx="460" cy="240" rx="170" ry="120" fill="url(#volume)"></ellipse>
+          <g fill="none" stroke="#fff0df" stroke-width="3" marker-end="url(#arrow5)">
+            <path d="M118 360 L635 130"></path>
+          </g>
+          <g fill="#fff0df">
+            <circle cx="118" cy="360" r="9"></circle>
+            <circle cx="272" cy="291" r="5"></circle>
+            <circle cx="366" cy="249" r="5"></circle>
+            <circle cx="461" cy="207" r="5"></circle>
+            <circle cx="558" cy="164" r="5"></circle>
+          </g>
+          <g fill="#d9d2c7" font-family="Inter, sans-serif" font-size="15">
+            <text x="82" y="390">camera origin \(\mathbf{o}\)</text>
+            <text x="620" y="116">ray direction \(\mathbf{d}\)</text>
+            <text x="414" y="105">sampled volume</text>
+            <text x="284" y="280">\(\mathbf{r}(t)=\mathbf{o}+t\mathbf{d}\)</text>
+            <text x="440" y="380">MLP predicts density and color per sample</text>
+          </g>
+        </svg>
+      </div>
+      <div class="footer">
+        <span>NeRF stores a function, not an explicit mesh.</span>
+        <span>Meshes can later be extracted from density with marching cubes.</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">NeRF Rendering Math</div>
+        <div class="number">07 / 13</div>
+      </div>
+      <div class="content">
+        <h2>Volume rendering turns density into pixel color</h2>
+        <div class="two">
+          <div class="panel compact">
+            <h3>Continuous form</h3>
+            <div class="formula">
+              \[
+                \mathbf{C}(\mathbf{r}) =
+                \int_{t_n}^{t_f}
+                T(t)\,\sigma(\mathbf{r}(t))\,\mathbf{c}(\mathbf{r}(t),\mathbf{d})\,dt
+              \]
+              \[
+                T(t)=\exp\left(-\int_{t_n}^{t}\sigma(\mathbf{r}(s))\,ds\right)
+              \]
+            </div>
+            <p class="muted">Transmittance \(T(t)\) is the probability that the ray reaches depth \(t\) without being absorbed.</p>
+          </div>
+          <div class="panel compact">
+            <h3>Sampled implementation</h3>
+            <div class="formula">
+              \[
+                \hat{\mathbf{C}}(\mathbf{r}) =
+                \sum_{i=1}^{N} w_i \mathbf{c}_i,\quad
+                w_i=T_i\left(1-e^{-\sigma_i \delta_i}\right)
+              \]
+              \[
+                T_i=\exp\left(-\sum_{j<i}\sigma_j\delta_j\right)
+              \]
+            </div>
+            <p class="muted">Training and rendering evaluate a finite set of points along each camera ray, then alpha-composite their colors front to back.</p>
+          </div>
+        </div>
+        <div class="panel compact">
+          <h3>Positional encoding</h3>
+          <p class="muted">Raw coordinates are lifted into high-frequency sinusoids so the MLP can represent sharp spatial variation:</p>
+          <div class="formula">
+            \[
+              \gamma(p)=
+              \left(\sin(2^0\pi p),\cos(2^0\pi p),\ldots,
+              \sin(2^{L-1}\pi p),\cos(2^{L-1}\pi p)\right)
+            \]
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>The image is differentiable with respect to field parameters \(\theta\).</span>
+        <span>That makes training direct photometric optimization.</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">NeRF Training</div>
+        <div class="number">08 / 13</div>
+      </div>
+      <div class="content split">
+        <svg class="diagram" viewBox="0 0 820 540" role="img" aria-label="NeRF training loop">
+          <defs>
+            <marker id="arrow6" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#c66f53"></path>
+            </marker>
+          </defs>
+          <rect x="34" y="36" width="752" height="420" rx="18" fill="#f1ece4" stroke="#ded8cf"></rect>
+          <rect x="82" y="92" width="155" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="330" y="92" width="155" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="578" y="92" width="155" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="578" y="292" width="155" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <rect x="330" y="292" width="155" height="76" rx="8" fill="#1d1c1a" stroke="#1d1c1a"></rect>
+          <rect x="82" y="292" width="155" height="76" rx="8" fill="#fffdf9" stroke="#ded8cf"></rect>
+          <g font-family="Inter, sans-serif" text-anchor="middle">
+            <text x="159" y="123" font-weight="800" font-size="16">Posed Images</text>
+            <text x="159" y="147" fill="#73706a" font-size="13">RGB + cameras</text>
+            <text x="407" y="123" font-weight="800" font-size="16">Sample Rays</text>
+            <text x="407" y="147" fill="#73706a" font-size="13">pixels + depths</text>
+            <text x="655" y="123" font-weight="800" font-size="16">MLP Field</text>
+            <text x="655" y="147" fill="#73706a" font-size="13">density + color</text>
+            <text x="655" y="323" font-weight="800" font-size="16">Render Pixels</text>
+            <text x="655" y="347" fill="#73706a" font-size="13">volume integral</text>
+            <text x="407" y="323" font-weight="800" font-size="16" fill="#fffaf0">Loss</text>
+            <text x="407" y="347" fill="#a9a49a" font-size="13">photometric error</text>
+            <text x="159" y="323" font-weight="800" font-size="16">Optimizer</text>
+            <text x="159" y="347" fill="#73706a" font-size="13">update \(\theta\)</text>
+          </g>
+          <g fill="none" stroke="#c66f53" stroke-width="3" marker-end="url(#arrow6)">
+            <path d="M237 130 H326"></path>
+            <path d="M485 130 H574"></path>
+            <path d="M655 168 V288"></path>
+            <path d="M578 330 H489"></path>
+            <path d="M330 330 H241"></path>
+            <path d="M159 292 C100 225 100 168 82 130"></path>
+          </g>
+          <text x="410" y="424" fill="#73706a" font-family="Inter, sans-serif" font-size="14" text-anchor="middle">
+            Repeat over random ray batches until rendered views match training images.
+          </text>
+        </svg>
+        <div class="compact">
+          <h2>Training optimizes rendered pixels</h2>
+          <p>The network is trained from calibrated images. Each batch samples camera rays, predicts color through volume rendering, and backpropagates image error.</p>
+          <div class="formula">
+            \[
+              \mathcal{L}(\theta)=
+              \sum_{\mathbf{r}\in\mathcal{R}}
+              \left\|
+                \hat{\mathbf{C}}_\theta(\mathbf{r})-\mathbf{C}_{gt}(\mathbf{r})
+              \right\|_2^2
+            \]
+          </div>
+          <ul>
+            <li>Inputs need camera poses and intrinsics.</li>
+            <li>Training samples many rays instead of full images.</li>
+            <li>Regularization and coarse-to-fine sampling improve stability.</li>
+            <li>Mesh export usually thresholds density and runs marching cubes.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer">
+        <span>The NeRF backend estimates or receives camera assumptions for selected views.</span>
+        <span>Training quality depends on pose accuracy, coverage, and object masks.</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Example 1</div>
+        <div class="number">09 / 13</div>
+      </div>
+      <div class="content">
+        <h2>Cake: image to 3D result</h2>
+        <div class="example-showcase">
+          <figure class="example-card">
+            <img class="example-shot" src="cake.jpg" alt="Cake input image">
+            <figcaption class="example-label"><span>Input image</span><code>cake.jpg</code></figcaption>
+          </figure>
+          <svg class="example-arrow" viewBox="0 0 100 64" aria-hidden="true">
+            <path d="M8 32 H78" stroke="#c66f53" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M64 14 L84 32 L64 50" fill="none" stroke="#c66f53" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <figure class="example-card">
+            <img class="example-shot" src="3D_cake.png" alt="Cake 3D output image">
+            <figcaption class="example-label"><span>3D reconstruction preview</span><code>3D_cake.png</code></figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="footer">
+        <span>Local image pair used by the presentation.</span>
+        <span>NeRF backend output preview</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Example 2</div>
+        <div class="number">10 / 13</div>
+      </div>
+      <div class="content">
+        <h2>Doll: image to 3D result</h2>
+        <div class="example-showcase">
+          <figure class="example-card">
+            <img class="example-shot" src="hatsune_miku.png" alt="Hatsune Miku input image">
+            <figcaption class="example-label"><span>Input image</span><code>hatsune_miku.png</code></figcaption>
+          </figure>
+          <svg class="example-arrow" viewBox="0 0 100 64" aria-hidden="true">
+            <path d="M8 32 H78" stroke="#c66f53" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M64 14 L84 32 L64 50" fill="none" stroke="#c66f53" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <figure class="example-card">
+            <img class="example-shot" src="3D_migu.png" alt="Hatsune Miku 3D output image">
+            <figcaption class="example-label"><span>3D reconstruction preview</span><code>3D_migu.png</code></figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="footer">
+        <span>Local image pair used by the presentation.</span>
+        <span>NeRF backend output preview</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Example 3</div>
+        <div class="number">11 / 13</div>
+      </div>
+      <div class="content">
+        <h2>Notre Dame: image to 3D result</h2>
+        <div class="example-showcase">
+          <figure class="example-card">
+            <img class="example-shot" src="notredame.jpg" alt="Notre Dame input image">
+            <figcaption class="example-label"><span>Input image</span><code>notredame.jpg</code></figcaption>
+          </figure>
+          <svg class="example-arrow" viewBox="0 0 100 64" aria-hidden="true">
+            <path d="M8 32 H78" stroke="#c66f53" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M64 14 L84 32 L64 50" fill="none" stroke="#c66f53" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <figure class="example-card">
+            <img class="example-shot" src="3D_notredame.png" alt="Notre Dame 3D output image">
+            <figcaption class="example-label"><span>3D reconstruction preview</span><code>3D_notredame.png</code></figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="footer">
+        <span>Local image pair used by the presentation.</span>
+        <span>NeRF backend output preview</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topline">
+        <div class="kicker">Example 4</div>
+        <div class="number">12 / 13</div>
+      </div>
+      <div class="content">
+        <h2>Chair: image to 3D result</h2>
+        <div class="example-showcase">
+          <figure class="example-card">
+            <img class="example-shot" src="chair.png" alt="Chair input image">
+            <figcaption class="example-label"><span>Input image</span><code>chair.png</code></figcaption>
+          </figure>
+          <svg class="example-arrow" viewBox="0 0 100 64" aria-hidden="true">
+            <path d="M8 32 H78" stroke="#c66f53" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M64 14 L84 32 L64 50" fill="none" stroke="#c66f53" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <figure class="example-card">
+            <img class="example-shot" src="3D_chair.png" alt="Chair 3D output image">
+            <figcaption class="example-label"><span>3D reconstruction preview</span><code>3D_chair.png</code></figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="footer">
+        <span>Local image pair used by the presentation.</span>
+        <span>NeRF backend output preview</span>
+      </div>
+    </section>
+
+    <section class="slide dark">
+      <div class="topline">
+        <div class="kicker">Summary</div>
+        <div class="number">13 / 13</div>
+      </div>
+      <div class="content split">
+        <div class="compact">
+          <h2>Core takeaways</h2>
+          <ul>
+            <li>The project is a staged, typed scene-to-asset pipeline.</li>
+            <li>Segmentation and view filtering protect the backend from bad crops.</li>
+            <li>The NeRF neural-network backend sits behind a small protocol.</li>
+            <li>Reports make uncertainty explicit: confidence, warnings, mesh stats, texture caveats.</li>
+            <li>NeRF is the volumetric backend: differentiable rendering plus photometric training.</li>
+          </ul>
+        </div>
+        <div class="panel compact">
+          <h3>Where NeRF fits</h3>
+          <p class="muted">The NeRF backend consumes selected views with camera estimates, optimizes a field \(F_\theta\), extracts a mesh, then hands the result to the existing postprocess and export stages.</p>
+          <div class="formula">
+            \[
+              \text{views} + \text{poses}
+              \rightarrow F_\theta
+              \rightarrow \mathcal{M}
+              \rightarrow \texttt{asset.glb}
+            \]
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>Clean architecture: isolate heavy ML systems behind contracts.</span>
+        <span>Presentation file: <code>project_presentation.html</code></span>
+      </div>
+    </section>
+  </main>
+
+  <div class="controls">
+    <button id="prev" type="button" aria-label="Previous slide">&#8249;</button>
+    <button id="next" type="button" aria-label="Next slide">&#8250;</button>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const bar = document.getElementById("bar");
+    let index = 0;
+
+    function show(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+      bar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      history.replaceState(null, "", `#${index + 1}`);
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([slides[index]]).catch(() => {});
+      }
+    }
+
+    prev.addEventListener("click", () => show(index - 1));
+    next.addEventListener("click", () => show(index + 1));
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") show(index + 1);
+      if (event.key === "ArrowLeft" || event.key === "PageUp") show(index - 1);
+      if (event.key === "Home") show(0);
+      if (event.key === "End") show(slides.length - 1);
+    });
+
+    const requested = Number.parseInt(location.hash.replace("#", ""), 10);
+    show(Number.isFinite(requested) ? requested - 1 : 0);
+  </script>
+</body>
+</html>

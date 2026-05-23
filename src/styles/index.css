@@ -36,38 +36,73 @@
   --display: 'General Sans', 'Plus Jakarta Sans', 'Cabinet Grotesk', system-ui, sans-serif;
   --body:    'Inter', 'DM Sans', system-ui, sans-serif;
   --mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Navbar — 25% shorter (TASKS_2.md §5) */
+  --navbar-height: 54px;
+
+  /* Section / spacing scale (TASKS_3.md §1) — over-spaced on purpose. */
+  --section-pad-v-desktop: 140px;
+  --section-pad-v-mobile:  80px;
+  --section-pad-h-desktop: 80px;
+  --section-pad-h-mobile:  28px;
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
   font-family: var(--body);
-  background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  font-size: 15px;
+  /* +2px global bump (TASKS_2.md §2) — body-md range moves 15→17 */
+  font-size: 17px;
   line-height: 1.5;
-  /* Soft global lavender bloom — barely there, but anchors the cool palette */
-  background-image:
-    radial-gradient(ellipse 90% 60% at 80% -10%, rgba(108, 78, 210, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 60% at 0% 20%, rgba(160, 107, 216, 0.06) 0%, transparent 65%);
+  /* Exponential gradient — stays white for ~70%, then accelerates to lavender (TASKS_3.md §5).
+     `background-attachment: fixed` anchors the gradient to the viewport so the floor
+     "falls away" as the user nears the footer regardless of total page length. */
+  background:
+    linear-gradient(
+      to bottom,
+      #FFFFFF  0%,
+      #FDFCFF  45%,
+      #F8F6FE  70%,
+      #EEEAF8  80%,
+      #E0DAF4  86%,
+      #CEBFF0  91%,
+      #BAB0E8  95%,
+      #A89EDF  100%
+    );
   background-attachment: fixed;
+  min-height: 100vh;
+}
+@media (max-width: 768px) {
+  body {
+    /* Mobile Safari can be flaky with fixed attachment — switch to scroll + simpler stops. */
+    background:
+      linear-gradient(
+        to bottom,
+        #FFFFFF 0%,
+        #F8F6FE 65%,
+        #CEBFF0 88%,
+        #A89EDF 100%
+      );
+    background-attachment: scroll;
+  }
 }
 ::selection { background: rgba(108, 78, 210, 0.18); color: var(--ink); }
 
-/* type primitives */
+/* type primitives — sizes per TASKS_2.md §2 (+2px across the scale) */
 .display        { font-family: var(--display); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; }
 .display-italic { font-family: var(--display); font-weight: 700; font-style: italic; letter-spacing: -0.02em; }
-.h1 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em;  line-height: 1.15; font-size: 32px; }
-.h2 { font-family: var(--display); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;  font-size: 22px; }
-.h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.01em;  line-height: 1.3;  font-size: 16px; }
-.eyebrow { font-family: var(--body); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.h1 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em;  line-height: 1.15; font-size: 34px; }
+.h2 { font-family: var(--display); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;  font-size: 24px; }
+.h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.01em;  line-height: 1.3;  font-size: 18px; }
+.eyebrow { font-family: var(--body); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .eyebrow-dot::before {
   content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 999px;
   background: var(--accent); margin-right: 8px; vertical-align: middle;
   box-shadow: 0 0 0 3px rgba(108, 78, 210, 0.12);
 }
-.mono { font-family: var(--mono); font-size: 12px; letter-spacing: 0.01em; }
+.mono { font-family: var(--mono); font-size: 14px; letter-spacing: 0.01em; }
 .num  { font-family: var(--display); font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
 
 /* utility */
@@ -125,8 +160,8 @@ button { font-family: inherit; }
   .four-col  { grid-template-columns: 1fr 1fr !important; }
   /* Cheaper blur on mobile — spec calls for 8px fallback */
   .glass { backdrop-filter: blur(8px) saturate(160%); -webkit-backdrop-filter: blur(8px) saturate(160%); }
-  /* Navbar logo scales down to 40px height on mobile (TASKS.md §1) */
-  .navbar-logo img { height: 40px !important; min-width: 92px !important; }
+  /* Navbar logo scales down on mobile — proportional 25% reduction matches Task 5 */
+  .navbar-logo img { height: 30px !important; min-width: 69px !important; }
   /* Hero top padding tightens on mobile (TASKS.md §5) */
   .hero-section { padding-top: 48px !important; padding-bottom: 64px !important; }
 }
@@ -140,6 +175,375 @@ button { font-family: inherit; }
 
 .fade-in  { animation: fadeIn  0.4s ease both; }
 .slide-in { animation: slideIn 0.5s ease both; }
+
+/* Smart scroll-aware navbar (TASKS_2.md §4) */
+.navbar {
+  transform: translateY(0);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 200ms ease;
+}
+.navbar.is-hidden { transform: translateY(-100%); }
+.navbar.is-scrolled { box-shadow: 0 4px 20px rgba(80, 70, 160, 0.08); }
+
+/* Anchor offset so in-page jumps clear the fixed navbar */
+[id] { scroll-margin-top: calc(var(--navbar-height) + 8px); }
+
+/* Preview section — TASKS_3.md §2: drop the card boxes, let elements breathe.
+   The visual panel is the only distinct surface; text sits directly on the page. */
+.preview-section {
+  padding: var(--section-pad-v-desktop) var(--section-pad-h-desktop);
+  background: transparent;
+  text-align: center;
+}
+.preview-section h2 {
+  font-size: 50px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 20px;
+  letter-spacing: -0.025em;
+}
+.preview-section .subtitle {
+  font-size: 19px;
+  color: var(--muted);
+  margin: 0 auto 64px;
+  line-height: 1.6;
+  max-width: 760px;
+}
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 60px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: left;
+  align-items: start;
+}
+.preview-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.preview-card .card-visual {
+  width: 100%;
+  height: 320px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(80, 70, 160, 0.12);
+  margin-bottom: 32px;
+  background: var(--bg-2);
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.preview-card:hover .card-visual {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 64px rgba(80, 70, 160, 0.18);
+}
+.preview-card .card-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.preview-card .card-caption { padding: 0; background: transparent; }
+.preview-card .card-caption strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 12px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.preview-card .card-caption p {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
+@media (max-width: 960px) {
+  .preview-grid { grid-template-columns: 1fr; gap: 56px; }
+}
+@media (max-width: 640px) {
+  .preview-section {
+    padding: var(--section-pad-v-mobile) var(--section-pad-h-mobile);
+  }
+}
+
+/* Analyzing animation — TASKS_2.md §1 card 2 */
+.analyzing-shell {
+  width: 100%;
+  height: 100%;
+  background: #12143a;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+.analyzing-topbar { display: flex; align-items: center; gap: 8px; }
+.analyzing-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+.analyzing-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.70);
+  letter-spacing: 0.04em;
+}
+.analyzing-progress-track {
+  width: 100%; height: 4px;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.analyzing-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--good));
+  border-radius: 999px;
+  animation: fill-progress 3s ease-in-out infinite;
+}
+@keyframes fill-progress {
+  0%   { width: 0%; }
+  80%  { width: 100%; }
+  100% { width: 100%; opacity: 0; }
+}
+.metric-rows { display: flex; flex-direction: column; gap: 10px; }
+.metric-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: fade-row 3s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+@keyframes fade-row {
+  0%, 15% { opacity: 0; transform: translateX(-6px); }
+  30%, 80% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; }
+}
+.metric-name {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  width: 90px;
+  flex-shrink: 0;
+}
+.metric-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.metric-bar {
+  height: 100%;
+  width: var(--w);
+  background: var(--accent);
+  border-radius: 999px;
+}
+.metric-val {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.score-badge {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.score-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent);
+  border-top-color: transparent;
+  animation: spin-ring 3s linear infinite;
+}
+@keyframes spin-ring { to { transform: rotate(360deg); } }
+.score-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+
+/* Multidimensional Analysis panels — TASKS_3.md §3 */
+.analysis-section {
+  padding: var(--section-pad-v-desktop) var(--section-pad-h-desktop);
+  background: transparent;
+}
+.analysis-section .section-header  { margin-bottom: 72px; max-width: 760px; }
+.analysis-section h2 {
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 16px;
+  letter-spacing: -0.025em;
+}
+.analysis-section .subtitle {
+  font-size: 19px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.6;
+}
+.analysis-meta-pills { display: flex; gap: 10px; margin-top: 24px; }
+.analysis-meta-pill {
+  padding: 6px 16px; border-radius: 999px;
+  border: 1px solid rgba(200, 198, 220, 0.60);
+  font-size: 14px; color: var(--muted); background: transparent;
+  font-family: var(--mono);
+}
+
+.analysis-panels {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 28px;
+  max-width: 1280px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .analysis-panels { grid-template-columns: 1fr; gap: 20px; }
+}
+@media (max-width: 640px) {
+  .analysis-section {
+    padding: var(--section-pad-v-mobile) var(--section-pad-h-mobile);
+  }
+}
+
+.analysis-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  border-radius: 24px;
+  padding: 48px 40px;
+  min-height: 480px;
+}
+.analysis-panel .panel-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.analysis-panel .panel-headline {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 12px 0 0;
+}
+.analysis-panel .panel-body {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0;
+}
+.analysis-panel .panel-signals {
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  margin-top: auto;
+}
+.analysis-panel .panel-icon-hero {
+  height: 64px;
+  display: flex; align-items: center;
+}
+
+/* Voice — dominant, navy-filled */
+.panel-voice {
+  background: var(--ink);
+  padding: 56px 48px;
+  gap: 40px;
+}
+.panel-voice .panel-eyebrow { color: rgba(255, 255, 255, 0.45); }
+.panel-voice .panel-headline { color: #ffffff; font-size: 34px; }
+.panel-voice .panel-body     { color: rgba(255, 255, 255, 0.65); font-size: 17px; }
+.panel-voice .panel-signals  { color: rgba(255, 255, 255, 0.30); }
+.panel-voice .panel-icon-hero { color: rgba(108, 78, 210, 0.85); }
+
+/* Body — frosted violet glass */
+.panel-body-lang {
+  background: rgba(108, 78, 210, 0.08);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(108, 78, 210, 0.18);
+}
+.panel-body-lang .panel-eyebrow  { color: var(--accent); opacity: 0.7; }
+.panel-body-lang .panel-headline { color: var(--ink); }
+.panel-body-lang .panel-body     { color: var(--muted); }
+.panel-body-lang .panel-signals  { color: var(--muted-2); }
+.panel-body-lang .panel-icon-hero { color: var(--accent); }
+
+/* Content — clean white, green accent */
+.panel-content-lang {
+  background: #ffffff;
+  border: 1px solid rgba(200, 198, 220, 0.45);
+  box-shadow: 0 4px 24px rgba(80, 70, 160, 0.06);
+}
+.panel-content-lang .panel-eyebrow  { color: var(--good); opacity: 0.85; }
+.panel-content-lang .panel-headline { color: var(--ink); }
+.panel-content-lang .panel-body     { color: var(--muted); }
+.panel-content-lang .panel-signals  { color: var(--muted-2); }
+.panel-content-lang .panel-icon-hero { color: var(--good); }
+
+/* Sticky Get Started CTA — fixed top-right, OUTSIDE navbar (TASKS_3.md §4) */
+.btn-get-started-sticky {
+  position: fixed;
+  top: 12px;
+  right: 32px;
+  z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ink-2);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--body);
+  padding: 11px 24px;
+  border-radius: 999px;
+  border: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(14, 22, 52, 0.25);
+  transition: opacity 200ms, transform 200ms, box-shadow 200ms;
+  animation: cta-entrance 400ms ease-out 200ms both;
+}
+.btn-get-started-sticky:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(14, 22, 52, 0.30);
+}
+@keyframes cta-entrance {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  .btn-get-started-sticky {
+    padding: 9px 18px;
+    font-size: 14px;
+    right: 16px;
+  }
+}
 
 /* Reveal-on-scroll — 400ms ease-out, 40px Y offset (per DESIGN.md §8) */
 .reveal {

@@ -91,92 +91,135 @@ export function LangToggle() {
 }
 
 // ─── Header ────────────────────────────────────────────────────────────
+// Hides on scroll-down, shows on scroll-up (TASKS_2.md §4). 60px threshold
+// absorbs micro-scrolls at the top so the navbar doesn't flicker.
+function useNavbarScroll() {
+  const [hidden, setHidden] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    let lastY = window.scrollY
+    let ticking = false
+    const update = () => {
+      const y = window.scrollY
+      const goingDown = y > lastY
+      if (y > 60) setHidden(goingDown)
+      else setHidden(false)
+      setScrolled(y > 4)
+      lastY = y
+      ticking = false
+    }
+    const onScroll = () => {
+      if (!ticking) { window.requestAnimationFrame(update); ticking = true }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+  return { hidden, scrolled }
+}
+
 export function Header({ variant = "marketing", onNav, route, signedIn }) {
   const { t } = useT()
   const isApp = variant === "app"
+  const { hidden, scrolled } = useNavbarScroll()
+  // Sticky CTA shows only on marketing pages for visitors who can still sign up.
+  const showStickyCTA = !isApp && !signedIn
 
   return (
-    <header style={{
-      position: "sticky", top: 0, zIndex: 60,
-      background: "rgba(255, 255, 255, 0.90)",
-      backdropFilter: "blur(12px) saturate(180%)",
-      WebkitBackdropFilter: "blur(12px) saturate(180%)",
-      borderBottom: "1px solid var(--rule-soft)"
-    }}>
-      <div style={{
-        maxWidth: 1280, margin: "0 auto", padding: "14px 32px",
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24
+    <>
+      <header className={`navbar ${hidden ? "is-hidden" : ""} ${scrolled ? "is-scrolled" : ""}`} style={{
+        position: "sticky", top: 0, zIndex: 100,
+        minHeight: "var(--navbar-height)",
+        background: "rgba(255, 255, 255, 0.90)",
+        backdropFilter: "blur(12px) saturate(180%)",
+        WebkitBackdropFilter: "blur(12px) saturate(180%)",
+        borderBottom: "1px solid var(--rule-soft)"
       }}>
-        <Logo className="navbar-logo" onClick={() => onNav(signedIn ? "history" : "landing")} />
+        <div style={{
+          maxWidth: 1440, margin: "0 auto",
+          padding: "10px 72px",
+          display: "flex", alignItems: "center", gap: 40,
+        }}>
+          <Logo className="navbar-logo" size={42} minWidth={97} onClick={() => onNav(signedIn ? "history" : "landing")} />
 
-        {!isApp ?
-        <nav style={{ display: "flex", gap: 28, alignItems: "center" }}>
-            {[
-          { id: "platform", label: t("nav.platform"), kind: "anchor" },
-          { id: "services", label: t("nav.services"), kind: "anchor" },
-          { id: "pricing", label: t("nav.pricing"), kind: "route" },
-          { id: "about", label: t("nav.about"), kind: "anchor" }].
-          map((item) => {
-            const sx = {
-              color: "var(--ink)", textDecoration: "none", fontSize: 14, fontWeight: 500,
-              padding: "6px 0", borderBottom: "1.5px solid transparent",
-              background: "transparent", border: 0, cursor: "pointer",
-              fontFamily: "var(--body)",
-              transition: "border-color 0.15s"
-            }
-            const onEnter = (e) => e.currentTarget.style.borderBottomColor = "var(--ink)"
-            const onLeave = (e) => e.currentTarget.style.borderBottomColor = "transparent"
-            return item.kind === "route"
-              ? <button key={item.id} onClick={() => onNav(item.id)} style={sx}
-                  onMouseEnter={onEnter} onMouseLeave={onLeave}>{item.label}</button>
-              : <a key={item.id} href={`#${item.id}`} style={sx}
-                  onMouseEnter={onEnter} onMouseLeave={onLeave}>{item.label}</a>
-          })}
-          </nav> :
+          {!isApp ?
+            <nav style={{ display: "flex", gap: 36, alignItems: "center" }}>
+              {[
+                { id: "platform", label: t("nav.platform"), kind: "anchor" },
+                { id: "services", label: t("nav.services"), kind: "anchor" },
+                { id: "pricing", label: t("nav.pricing"), kind: "route" },
+                { id: "about", label: t("nav.about"), kind: "anchor" }
+              ].map((item) => {
+                const sx = {
+                  color: "var(--ink)", textDecoration: "none", fontSize: 15, fontWeight: 500,
+                  padding: "6px 0", borderBottom: "1.5px solid transparent",
+                  background: "transparent", border: 0, cursor: "pointer",
+                  fontFamily: "var(--body)",
+                  transition: "border-color 0.15s"
+                }
+                const onEnter = (e) => e.currentTarget.style.borderBottomColor = "var(--ink)"
+                const onLeave = (e) => e.currentTarget.style.borderBottomColor = "transparent"
+                return item.kind === "route"
+                  ? <button key={item.id} onClick={() => onNav(item.id)} style={sx}
+                      onMouseEnter={onEnter} onMouseLeave={onLeave}>{item.label}</button>
+                  : <a key={item.id} href={`#${item.id}`} style={sx}
+                      onMouseEnter={onEnter} onMouseLeave={onLeave}>{item.label}</a>
+              })}
 
-        <nav style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            {[
-          { id: "workspace", icon: "add_circle", label: { fr: "Nouvelle", en: "New" } },
-          { id: "history", icon: "history", label: { fr: "Historique", en: "History" } }].
-          map((item) => {
-            const active = route === item.id || item.id === "workspace" && route === "processing"
-            return (
-              <button key={item.id} onClick={() => onNav(item.id)} style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                padding: "8px 14px", borderRadius: 999,
-                background: active ? "var(--ink-2)" : "transparent",
-                color: active ? "white" : "var(--ink)",
-                border: 0, fontSize: 13, fontWeight: 500, cursor: "pointer",
-                fontFamily: "var(--body)", transition: "all 0.15s"
-              }}>
-                  <span className="icon" style={{ fontSize: 18 }}>{item.icon}</span>
-                  <NavLabel item={item} />
-                </button>)
+              {/* Sign in sits next to the nav links — left-anchored group (TASKS_3.md §4) */}
+              {!signedIn && (
+                <button onClick={() => onNav("auth-signin")}
+                  style={{
+                    background: "transparent", border: 0, padding: "6px 0",
+                    color: "var(--muted)", fontFamily: "var(--body)",
+                    fontSize: 15, fontWeight: 500, cursor: "pointer",
+                    marginLeft: 8, transition: "color 150ms",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = "var(--ink)"}
+                  onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}>
+                  {t("nav.signin")}
+                </button>
+              )}
+            </nav> :
 
-          })}
-          </nav>
-        }
-
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <LangToggle />
-          {!signedIn ?
-          <>
-              <button onClick={() => onNav("auth-signin")} style={{
-              border: "1.5px solid var(--rule)", background: "white", color: "var(--ink)",
-              padding: "8px 16px", borderRadius: 999, fontWeight: 500, fontSize: 13, cursor: "pointer"
-            }}>{t("nav.signin")}</button>
-              <button onClick={() => onNav("auth-signup")} style={{
-              border: 0, background: "var(--ink-2)", color: "white",
-              padding: "9px 18px", borderRadius: 999, fontWeight: 500, fontSize: 13, cursor: "pointer"
-            }}>{t("nav.signup")}</button>
-            </> :
-
-          <UserMenu onNav={onNav} />
+            <nav style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              {[
+                { id: "workspace", icon: "add_circle", label: { fr: "Nouvelle", en: "New" } },
+                { id: "history", icon: "history", label: { fr: "Historique", en: "History" } }
+              ].map((item) => {
+                const active = route === item.id || item.id === "workspace" && route === "processing"
+                return (
+                  <button key={item.id} onClick={() => onNav(item.id)} style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "8px 14px", borderRadius: 999,
+                    background: active ? "var(--ink-2)" : "transparent",
+                    color: active ? "white" : "var(--ink)",
+                    border: 0, fontSize: 13, fontWeight: 500, cursor: "pointer",
+                    fontFamily: "var(--body)", transition: "all 0.15s"
+                  }}>
+                    <span className="icon" style={{ fontSize: 18 }}>{item.icon}</span>
+                    <NavLabel item={item} />
+                  </button>)
+              })}
+            </nav>
           }
-        </div>
-      </div>
-    </header>)
 
+          {/* Right cluster — language toggle + (when signed in) user menu.
+             Get Started for visitors lives outside the navbar entirely (see below). */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto" }}>
+            <LangToggle />
+            {signedIn && <UserMenu onNav={onNav} />}
+          </div>
+        </div>
+      </header>
+
+      {/* Sticky Get Started — fixed top-right, sibling of <header>, never hidden by scroll (TASKS_3.md §4) */}
+      {showStickyCTA && (
+        <button className="btn-get-started-sticky" onClick={() => onNav("auth-signup")}>
+          {t("nav.signup")} →
+        </button>
+      )}
+    </>
+  )
 }
 
 function NavLabel({ item }) {

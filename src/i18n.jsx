@@ -38,6 +38,21 @@ export const STRINGS = {
   "landing.dim.voice":   { fr: "Voix", en: "Voice" },
   "landing.dim.body":    { fr: "Corps", en: "Body" },
   "landing.dim.content": { fr: "Contenu", en: "Content" },
+  "panel.voice.eyebrow":   { fr: "Voix",    en: "Voice" },
+  "panel.voice.headline":  { fr: "Sonnez sûr de vous,<br>avant même d'avoir parlé.", en: "Sound confident<br>before you say a word." },
+  "panel.voice.body":      { fr: "Votre voix transmet bien plus que vos mots. Nood écoute votre débit, votre énergie et votre tonalité émotionnelle — et vous dit exactement quand vous perdez l'attention.", en: "Your voice carries more than your words. Nood listens for pace, energy, and emotional tone — and tells you exactly when you're losing the room." },
+  "panel.voice.signals":   { fr: "Débit · Mots parasites · Hauteur · Pauses · Émotion", en: "Pace · Filler words · Pitch · Pauses · Emotion" },
+
+  "panel.body.eyebrow":    { fr: "Corps",   en: "Body" },
+  "panel.body.headline":   { fr: "Votre corps<br>parle en premier.", en: "Your body<br>speaks first." },
+  "panel.body.body":       { fr: "Avant même d'ouvrir la bouche, votre posture, vos gestes et votre regard ont déjà parlé. Nood les lit, image par image.", en: "Before you open your mouth, your posture, gestures, and eye contact have already made an impression. Nood reads all of it, frame by frame." },
+  "panel.body.signals":    { fr: "Posture · Gestes · Regard · Espace · Émotion", en: "Posture · Gestures · Eye contact · Space · Emotion" },
+
+  "panel.content.eyebrow": { fr: "Contenu", en: "Content" },
+  "panel.content.headline":{ fr: "Dites la bonne chose,<br>au bon moment.", en: "Say the right thing,<br>at the right moment." },
+  "panel.content.body":    { fr: "Une exécution parfaite ne sert à rien si le message ne passe pas. Nood vérifie la clarté narrative, la force de votre ouverture et l'adéquation de vos mots à votre objectif.", en: "Great delivery means nothing if the message doesn't land. Nood checks narrative clarity, opening strength, and whether your words match your goal." },
+  "panel.content.signals": { fr: "Ton · Récit · Vocabulaire · Ouverture · Adéquation", en: "Tone · Narrative · Vocabulary · Opening · Fit" },
+
   "landing.dim.voice.items":   { fr: ["Débit (mots/min)", "Mots parasites", "Variations de hauteur", "Pauses stratégiques", "Émotion vocale"], en: ["Pace (words/min)", "Filler words", "Pitch variation", "Strategic pauses", "Vocal emotion"] },
   "landing.dim.body.items":    { fr: ["Posture & équilibre", "Gestuelle illustrative", "Contact visuel", "Occupation de l'espace", "Distribution émotionnelle"], en: ["Posture & balance", "Illustrative gestures", "Eye contact", "Use of space", "Emotion distribution"] },
   "landing.dim.content.items": { fr: ["Cohérence du ton", "Structure narrative", "Richesse lexicale", "Force d'introduction", "Adéquation au contexte"], en: ["Tone coherence", "Narrative structure", "Lexical richness", "Opening strength", "Context fit"] },
@@ -134,6 +149,10 @@ export const STRINGS = {
   "landing.faq.a3":     { fr: "Français et anglais en analyse complète. D'autres langues en bêta.", en: "French and English with full analysis. Other languages in beta." },
   "landing.faq.q4":     { fr: "Puis-je l'utiliser hors ligne ?", en: "Can I use it offline?" },
   "landing.faq.a4":     { fr: "L'application desktop (Windows / macOS) fonctionne hors ligne après l'installation des modèles.", en: "The desktop app (Windows / macOS) works offline once models are installed." },
+  "landing.faq.q5":     { fr: "À qui s'adresse Nood ?", en: "Who is Nood for?" },
+  "landing.faq.a5":     { fr: "Nood s'adresse à toute personne souhaitant débloquer les opportunités professionnelles et personnelles que procure une prise de parole percutante. Il aide les professionnels, les entrepreneurs et les étudiants à concevoir des présentations qui impressionnent, persuadent et inspirent. En améliorant vos compétences en communication, Nood peut vous aider à obtenir une promotion, à convaincre des investisseurs ou à influencer n'importe quel public avec assurance. En somme, c'est pour quiconque est prêt à transformer ses mots en résultats concrets.", en: "Nood is for anyone who wants to unlock the career and personal opportunities that come with powerful public speaking. It helps professionals, entrepreneurs, and students craft presentations that impress, persuade, and inspire. By improving your communication skills, Nood can help you land promotions, win investors, or influence any audience with confidence. Essentially, it's for anyone ready to turn words into real-world results." },
+  "landing.faq.q6":     { fr: "Nood est-il gratuit ?", en: "Is Nood free?" },
+  "landing.faq.a6":     { fr: "Nous proposons un forfait gratuit avec un accès limité à nos fonctionnalités principales. Le forfait Pro débloque une analyse plus détaillée et une limite d'envoi étendue.", en: "We offer a free plan that includes limited access to our core features. The pro plan unlocks access to a more detailed analysis with an extended upload cap." },
 
   "landing.footer.tagline": { fr: "La première plateforme IA dédiée à l'excellence oratoire pour les étudiants et leaders.", en: "The first AI platform built for speaking excellence — for students and leaders." },
   "landing.footer.legal":   { fr: "Légal", en: "Legal" },
